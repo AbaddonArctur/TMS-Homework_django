@@ -1,0 +1,135 @@
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from .models import Recipe, Comment
+from .forms import RecipeForm, CommentForm, RegisterForm
+from django.contrib import messages
+
+def index(request):
+    q = request.GET.get("q", "")
+    category = request.GET.get("category", "")
+    recipes = Recipe.objects.all().order_by("-created_at")
+
+    if q:
+        recipes = recipes.filter(title__icontains=q) | recipes.filter(ingredients__icontains=q)
+    if category:
+        recipes = recipes.filter(category__icontains=category)
+
+    paginator = Paginator(recipes, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, "index.html", {"page_obj": page_obj, "q": q, "category": category})
+
+@login_required
+def add_recipe(request):
+    if request.method == "POST":
+        form = RecipeForm(request.POST, request.FILES)
+        if form.is_valid():
+            recipe = form.save(commit=False)
+            recipe.author = request.user
+            recipe.save()
+            return redirect("recipe_detail", recipe.id)
+    else:
+        form = RecipeForm()
+    return render(request, "add_recipe.html", {"form": form, "title": "Добавить рецепт"})
+
+def recipe_detail(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    comments = recipe.comments.filter(parent__isnull=True).order_by("-created_at")
+    form = CommentForm()
+
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            messages.error(request, "Чтобы оставить комментарий, войдите в систему.")
+            return redirect("login")
+
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            parent_id = request.POST.get("parent_id")
+            comment = form.save(commit=False)
+            comment.recipe = recipe
+            comment.author = request.user
+
+            if parent_id:
+                parent_comment = Comment.objects.filter(id=parent_id, recipe=recipe).first()
+                if parent_comment:
+                    comment.parent = parent_comment
+
+            comment.save()
+            return redirect("recipe_detail", pk=recipe.id)
+
+    return render(request, "recipe_detail.html", {
+        "recipe": recipe,
+        "comments": comments,
+        "form": form,
+    })
+
+@login_required
+def edit_recipe(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    if recipe.author != request.user:
+        return redirect("index")
+    form = RecipeForm(request.POST or None, request.FILES or None, instance=recipe)
+    if form.is_valid():
+        form.save()
+        return redirect("recipe_detail", pk=pk)
+    return render(request, "edit_recipe.html", {"form": form, "title": "Редактировать рецепт"})
+
+@login_required
+def delete_recipe(request, pk):
+    recipe = get_object_or_404(Recipe, pk=pk)
+    if recipe.author == request.user:
+        recipe.delete()
+    return redirect("index")
+
+def register_view(request):
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("login")
+    else:
+        form = RegisterForm()
+    return render(request, "register.html", {"form": form})
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login
+
+def login_view(request):
+    username_error = ""
+    password_error = ""
+
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "").strip()
+
+        if not username:
+            username_error = "Обязательное поле."
+        if not password:
+            password_error = "Обязательное поле."
+
+        if username and password:
+            user = authenticate(request, username=username, password=password)
+            if user:
+                login(request, user)
+                return redirect("index")
+            else:
+                password_error = "Неверное имя пользователя или пароль."
+
+    return render(request, "login.html", {
+        "username_error": username_error,
+        "password_error": password_error,
+    })
+
+def logout_view(request):
+    logout(request)
+    return redirect("index")
+
+@login_required
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if comment.author == request.user:
+        comment.delete()
+    return redirect("recipe_detail", pk=comment.recipe.id)

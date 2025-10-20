@@ -1,0 +1,70 @@
+.card-img-top {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.no-image {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e9ecef;
+    color: #6c757d;
+    font-style: italic;
+}
+
+footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+form label {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.card {
+    border-radius: 10px;
+}
+
+.card h4 {
+    font-weight: 600;
+}
+
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+
+.recipe-image {
+    width: 100%;
+    height: 400px;
+    object-fit: contain;
+    background-color: #f8f9fa;
+}
+
+.replies {
+    border-left: 2px solid #ccc;
+    padding-left: 10px;
+}
+
+.reply-form-container textarea {
+    resize: none;
+}
+
+textarea {
+    resize: none;
+    overflow-y: hidden;
+    min-height: 80px;
+    transition: height 0.2s ease;
+}
