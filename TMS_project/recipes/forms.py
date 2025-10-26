@@ -38,16 +38,19 @@ class CommentForm(forms.ModelForm):
         }
 
 class RegisterForm(UserCreationForm):
+
     username = forms.CharField(label="Имя пользователя", max_length=150)
-    password1 = forms.CharField(label="Пароль", widget=forms.PasswordInput)
-    password2 = forms.CharField(label="Повторите пароль", widget=forms.PasswordInput)
+    password = forms.CharField(label="Пароль", widget=forms.PasswordInput)
+    verify_password = forms.CharField(label="Повторите пароль", widget=forms.PasswordInput)
 
     class Meta:
         model = User
-        fields = ["username", "password1", "password2"]
+        fields = ["username"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["password1"] = self.fields.pop("password")
+        self.fields["password2"] = self.fields.pop("verify_password")
         for field in self.fields.values():
             field.widget.attrs.update({
                 "class": "form-control",

@@ -5,7 +5,7 @@
 <div class="d-flex justify-content-center">
     <div class="card p-4 shadow-sm" style="max-width: 500px; width: 100%;">
         <h4 class="mb-3 text-center">Регистрация</h4>
-        <form method="post">
+        <form method="post" action="{% url 'register_post' %}">
             {% csrf_token %}
             {% for field in form %}
                 <div class="mb-3">

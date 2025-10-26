@@ -58,6 +58,10 @@ form label {
     padding-left: 10px;
 }
 
+.reply-form-container {
+    margin-top: .5rem;
+}
+
 .reply-form-container textarea {
     resize: none;
 }
@@ -67,4 +71,8 @@ textarea {
     overflow-y: hidden;
     min-height: 80px;
     transition: height 0.2s ease;
+}
+
+.comment .d-flex > div:first-child {
+  min-width: 0;
 }

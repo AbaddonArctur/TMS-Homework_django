@@ -5,7 +5,7 @@
 <div class="d-flex justify-content-center">
     <div class="card p-4 shadow-sm" style="max-width: 400px; width: 100%;">
         <h4 class="mb-3 text-center">Вход</h4>
-        <form method="post" novalidate>
+        <form method="post" action="{% url 'login_post' %}">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="username" class="form-label">Имя пользователя</label>
