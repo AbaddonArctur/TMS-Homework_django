@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ recipe.title }}{% endblock %}
+{% block title %}Описание рецепта{{ recipe.title }}{% endblock %}
 {% block content %}
 
 <div class="card mb-4">
@@ -13,7 +13,13 @@
         <p class="text-muted">{{ recipe.category }}</p>
         <p>{{ recipe.description }}</p>
         <h5>Ингредиенты</h5>
-        <pre>{{ recipe.ingredients }}</pre>
+        <ul>
+          {% for ing in recipe.ingredients.all %}
+            <li>{{ ing.name }}{% if ing.amount %} — {{ ing.amount }}{% endif %}</li>
+          {% empty %}
+            <li>Ингредиенты не указаны</li>
+          {% endfor %}
+        </ul>
         <h5>Инструкции</h5>
         <pre>{{ recipe.instructions }}</pre>
         {% if recipe.author == user %}

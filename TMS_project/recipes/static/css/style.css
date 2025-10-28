@@ -76,3 +76,14 @@ textarea {
 .comment .d-flex > div:first-child {
   min-width: 0;
 }
+
+form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+.ingredient-item input {
+    width: 100%;
+}
+.btn {
+    border-radius: 10px;
+}

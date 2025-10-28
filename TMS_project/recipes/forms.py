@@ -1,17 +1,17 @@
 from django import forms
-from .models import Recipe, Comment
+from .models import Recipe, Comment, Ingredient
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.forms import inlineformset_factory
 
 class RecipeForm(forms.ModelForm):
     class Meta:
         model = Recipe
-        fields = ["title", "category", "description", "ingredients", "instructions", "image"]
+        fields = ["title", "category", "description", "instructions", "image"]
         labels = {
             "title": "Название рецепта",
             "category": "Категория",
-            "description": "Краткое описание",
-            "ingredients": "Ингредиенты",
+            "description": "Описание",
             "instructions": "Пошаговая инструкция",
             "image": "Изображение",
         }
@@ -23,6 +23,28 @@ class RecipeForm(forms.ModelForm):
                 "class": "form-control",
                 "style": "max-width: 500px;"
             })
+
+            if isinstance(field.widget, forms.Textarea):
+                field.widget.attrs.update({"rows": 4, "style": "resize: vertical; max-width: 500px;"})
+
+class IngredientForm(forms.ModelForm):
+    class Meta:
+        model = Ingredient
+        fields = ["name", "amount"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Мука"}),
+            "amount": forms.TextInput(attrs={"class": "form-control", "placeholder": "200 г"}),
+        }
+
+IngredientFormSet = inlineformset_factory(
+    Recipe,
+    Ingredient,
+    form=IngredientForm,
+    extra=0,
+    min_num=1,
+    validate_min=True,
+    can_delete=True
+)
 
 class CommentForm(forms.ModelForm):
     class Meta:
@@ -38,7 +60,6 @@ class CommentForm(forms.ModelForm):
         }
 
 class RegisterForm(UserCreationForm):
-
     username = forms.CharField(label="Имя пользователя", max_length=150)
     password = forms.CharField(label="Пароль", widget=forms.PasswordInput)
     verify_password = forms.CharField(label="Повторите пароль", widget=forms.PasswordInput)

@@ -6,7 +6,7 @@
     <input class="form-control me-2" type="search" name="q" placeholder="Поиск рецептов" value="{{ q }}">
     <button class="btn btn-success me-2" type="submit">Поиск</button>
     {% if q %}
-        <a href="{% url 'index' %}" class="btn btn-outline-secondary">Очистить</a>
+        <a href="{% url 'index' %}" class="btn btn-secondary">Очистить</a>
     {% endif %}
 </form>
 
@@ -24,7 +24,7 @@
                     <h5 class="card-title">{{ recipe.title }}</h5>
                     <p class="text-muted small mb-1">{{ recipe.category }}</p>
                     <p class="card-text flex-grow-1">{{ recipe.description|truncatechars:100 }}</p>
-                    <a href="{% url 'recipe_detail' recipe.id %}" class="btn btn-outline-success btn-sm mt-auto">Смотреть</a>
+                    <a href="{% url 'recipe_detail' recipe.id %}" class="btn btn-success btn-sm mt-auto">Смотреть</a>
                 </div>
             </div>
         </div>

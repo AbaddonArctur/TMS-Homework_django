@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET, require_POST
 from django.core.paginator import Paginator
 from .models import Recipe, Comment
-from .forms import RecipeForm, CommentForm, RegisterForm
+from .forms import RecipeForm, CommentForm, RegisterForm, IngredientFormSet
 
 @require_GET
 def index(request):
@@ -27,14 +27,19 @@ def index(request):
 def add_recipe(request):
     if request.method == "POST":
         form = RecipeForm(request.POST, request.FILES)
-        if form.is_valid():
+        formset = IngredientFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
             recipe = form.save(commit=False)
             recipe.author = request.user
             recipe.save()
-            return redirect("recipe_detail", recipe.id)
+            formset.instance = recipe
+            formset.save()
+            return redirect("recipe_detail", pk=recipe.pk)
     else:
         form = RecipeForm()
-    return render(request, "add_recipe.html", {"form": form, "title": "Добавить рецепт"})
+        formset = IngredientFormSet()
+
+    return render(request, "add_recipe.html", {"form": form, "formset": formset})
 
 def recipe_detail(request, pk):
     recipe = get_object_or_404(Recipe, pk=pk)
@@ -78,6 +83,7 @@ def recipe_comment_post(request, pk):
         comment.author = request.user
 
         parent_id = request.POST.get("parent_id")
+
         if parent_id:
             parent_comment = Comment.objects.filter(id=parent_id, recipe=recipe).first()
             if parent_comment:
@@ -94,17 +100,28 @@ def edit_recipe(request, pk):
     if recipe.author != request.user:
         return redirect("index")
 
-    form = RecipeForm(request.POST or None, request.FILES or None, instance=recipe)
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        return redirect("recipe_detail", pk=pk)
+    if request.method == "POST":
+        form = RecipeForm(request.POST, request.FILES, instance=recipe)
+        formset = IngredientFormSet(request.POST, instance=recipe)
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            return redirect("recipe_detail", pk=recipe.pk)
+    else:
+        form = RecipeForm(instance=recipe)
+        formset = IngredientFormSet(instance=recipe)
 
-    return render(request, "edit_recipe.html", {"form": form, "title": "Редактировать рецепт"})
+    return render(request, "edit_recipe.html", {
+        "form": form,
+        "formset": formset,
+        "recipe": recipe,
+    })
 
 @login_required
 @require_POST
 def delete_recipe(request, pk):
     recipe = get_object_or_404(Recipe, pk=pk)
+
     if recipe.author == request.user:
         recipe.delete()
     return redirect("index")
@@ -113,6 +130,7 @@ def delete_recipe(request, pk):
 def delete_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
     recipe = comment.recipe
+
     if comment.author == request.user:
         comment.delete()
     return redirect("recipe_detail", pk=recipe.id)
