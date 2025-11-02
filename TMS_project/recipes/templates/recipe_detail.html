@@ -4,9 +4,9 @@
 
 <div class="card mb-4">
     {% if recipe.image %}
-        <img src="{{ recipe.image.url }}" class="card-img-top recipe-image" alt="{{ recipe.title }}">
+    <img src="{{ recipe.image.url }}" class="card-img-top recipe-image" alt="{{ recipe.title }}">
     {% else %}
-        <div class="card-img-top no-image">Нет изображения</div>
+    <div class="card-img-top no-image">Нет изображения</div>
     {% endif %}
     <div class="card-body">
         <h3>{{ recipe.title }}</h3>
@@ -14,11 +14,11 @@
         <p>{{ recipe.description }}</p>
         <h5>Ингредиенты</h5>
         <ul>
-          {% for ing in recipe.ingredients.all %}
+            {% for ing in recipe.ingredients.all %}
             <li>{{ ing.name }}{% if ing.amount %} — {{ ing.amount }}{% endif %}</li>
-          {% empty %}
+            {% empty %}
             <li>Ингредиенты не указаны</li>
-          {% endfor %}
+            {% endfor %}
         </ul>
         <h5>Инструкции</h5>
         <pre>{{ recipe.instructions }}</pre>
@@ -49,15 +49,15 @@
 
         <div class="d-flex align-items-center gap-2">
             {% if user.is_authenticated %}
-                <button class="btn btn-sm btn-primary reply-btn" data-id="{{ comment.id }}">
-                    Ответить
-                </button>
-                {% if comment.author == user %}
-                    <form method="post" action="{% url 'delete_comment' comment.id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
-                    </form>
-                {% endif %}
+            <button class="btn btn-sm btn-primary reply-btn" data-id="{{ comment.id }}">
+                Ответить
+            </button>
+            {% if comment.author == user %}
+            <form method="post" action="{% url 'delete_comment' comment.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+            </form>
+            {% endif %}
             {% endif %}
         </div>
 
@@ -86,10 +86,10 @@
                 <p>{{ reply.text }}</p>
 
                 {% if user == reply.author %}
-                    <form method="post" action="{% url 'delete_comment' reply.id %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
-                    </form>
+                <form method="post" action="{% url 'delete_comment' reply.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                </form>
                 {% endif %}
             </div>
         </div>
@@ -101,34 +101,39 @@
 {% endfor %}
 
 {% if user.is_authenticated %}
-<form method="post" action="{% url 'recipe_comment_post' recipe.id %}" class="mt-4 mb-5">
-    {% csrf_token %}
-    <div class="mb-3">
-        <textarea name="text" class="form-control" rows="3" placeholder="Добавьте комментарий..."></textarea>
-    </div>
-    <button type="submit" class="btn btn-success">Добавить комментарий</button>
-</form>
+<div class="comment-form-container">
+    <form method="post" action="{% url 'recipe_comment_post' recipe.id %}" class="mt-4 mb-5">
+        {% csrf_token %}
+        <div class="mb-3">
+            <textarea name="text" class="form-control" rows="3" placeholder="Добавьте комментарий..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Добавить комментарий</button>
+    </form>
+</div>
 {% else %}
 <p class="mt-3">
     Чтобы оставить комментарий, <a href="{% url 'login' %}">войдите</a>.
 </p>
 {% endif %}
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll(".reply-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const id = btn.getAttribute("data-id");
-            const form = document.getElementById(`reply-form-${id}`);
-            form.style.display = form.style.display === "none" ? "block" : "none";
-        });
-    });
 
-    document.querySelectorAll(".cancel-reply").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            btn.closest(".reply-form").style.display = "none";
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".reply-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const id = btn.getAttribute("data-id");
+                const form = document.getElementById(`reply-form-${id}`);
+                form.style.display = form.style.display === "none" ? "block" : "none";
+            });
+        });
+
+        document.querySelectorAll(".cancel-reply").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                e.preventDefault();
+                btn.closest(".reply-form").style.display = "none";
+            });
         });
     });
-});
 </script>
+
 {% endblock %}

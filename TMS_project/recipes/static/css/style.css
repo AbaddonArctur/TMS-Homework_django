@@ -81,9 +81,11 @@ form {
     max-width: 600px;
     margin: 0 auto;
 }
+
 .ingredient-item input {
     width: 100%;
 }
+
 .btn {
     border-radius: 10px;
 }
