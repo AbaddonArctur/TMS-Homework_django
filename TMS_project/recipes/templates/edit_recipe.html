@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Редактировать рецепт{% endblock %}
 {% block content %}
-<div class="container mt-4 mb-5" style="max-width: 700px;">
+
+<div class="container mt-4 mb-5">
     <h2 class="mb-4 text-center">Редактировать рецепт</h2>
 
     <form method="post" enctype="multipart/form-data" id="recipe-form">
@@ -61,11 +62,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const totalForms = document.querySelector('input[name$="-TOTAL_FORMS"]');
     const prefixPattern = new RegExp('-\\d+-','g');
 
-    addBtn.addEventListener("click", () => {
+    function getEmptyForm() {
         const currentCount = parseInt(totalForms.value, 10);
-        // клон последней формы (или первый, если нет)
         const prototype = container.querySelector('.ingredient-item');
-        if (!prototype) return;
+        if (!prototype) return null;
+
         const newNode = prototype.cloneNode(true);
 
         newNode.querySelectorAll('input').forEach(inp => {
@@ -83,8 +84,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const html = newNode.innerHTML.replace(prefixPattern, `-${currentCount}-`).replace(/__prefix__/g, currentCount);
         newNode.innerHTML = html;
 
-        container.appendChild(newNode);
-        totalForms.value = currentCount + 1;
+        return newNode;
+    }
+
+    addBtn.addEventListener("click", () => {
+        const newNode = getEmptyForm();
+        if (newNode) {
+            container.appendChild(newNode);
+            totalForms.value = parseInt(totalForms.value, 10) + 1;
+        }
     });
 
     container.addEventListener("click", (e) => {
@@ -92,6 +100,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const item = e.target.closest(".ingredient-item");
             const idInput = item.querySelector('input[name$="-id"]');
             const deleteInput = item.querySelector('input[name$="-DELETE"]');
+
+            const visibleItems = container.querySelectorAll('.ingredient-item:not([style*="display: none"])');
+
+            if (visibleItems.length <= 1) {
+                alert("Рецепт должен содержать хотя бы один ингредиент");
+                return;
+            }
 
             if (idInput && idInput.value) {
                 if (deleteInput) {
@@ -107,6 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 item.style.display = 'none';
             } else {
+
                 item.remove();
                 const items = container.querySelectorAll('.ingredient-item');
                 items.forEach((it, idx) => {
@@ -119,4 +135,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
+
 {% endblock %}

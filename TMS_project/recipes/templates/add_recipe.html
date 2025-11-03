@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Добавить рецепт{% endblock %}
-
 {% block content %}
-<div class="container mt-4 mb-5" style="max-width: 700px;">
+
+<div class="container mt-4 mb-5">
     <h2 class="mb-4 text-center">Добавить рецепт</h2>
 
     <form method="post" enctype="multipart/form-data" id="recipe-form">
@@ -57,71 +57,86 @@
 </style>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const container = document.getElementById("ingredient-forms");
-        const addBtn = document.getElementById("add-ingredient");
-        const totalForms = document.querySelector('input[name$="-TOTAL_FORMS"]');
-        const prefixPattern = new RegExp('-\\d+-', 'g');
+document.addEventListener("DOMContentLoaded", () => {
+    const container = document.getElementById("ingredient-forms");
+    const addBtn = document.getElementById("add-ingredient");
+    const totalForms = document.querySelector('input[name$="-TOTAL_FORMS"]');
+    const prefixPattern = new RegExp('-\\d+-', 'g');
 
-        addBtn.addEventListener("click", () => {
-            const currentCount = parseInt(totalForms.value, 10);
-            const prototype = container.querySelector('.ingredient-item');
-            if (!prototype) return;
+    function getEmptyForm() {
+        const currentCount = parseInt(totalForms.value, 10);
+        const prototype = container.querySelector('.ingredient-item');
+        if (!prototype) return null;
 
-            const newNode = prototype.cloneNode(true);
+        const newNode = prototype.cloneNode(true);
 
-            newNode.querySelectorAll('input').forEach(inp => {
-                if (inp.name && inp.name.endsWith('-id')) {
-                    inp.value = "";
-                } else if (inp.name && inp.name.endsWith('-DELETE')) {
-                    inp.checked = false;
-                    inp.value = '';
-                } else {
-                    inp.value = "";
-                }
-            });
-            newNode.querySelectorAll('textarea').forEach(t => t.value = "");
-
-            const html = newNode.innerHTML
-                .replace(prefixPattern, `-${currentCount}-`)
-                .replace(/__prefix__/g, currentCount);
-            newNode.innerHTML = html;
-
-            container.appendChild(newNode);
-            totalForms.value = currentCount + 1;
-        });
-
-        container.addEventListener("click", (e) => {
-            if (e.target.classList.contains("btn-delete-ingredient")) {
-                const item = e.target.closest(".ingredient-item");
-                const idInput = item.querySelector('input[name$="-id"]');
-                const deleteInput = item.querySelector('input[name$="-DELETE"]');
-
-                if (idInput && idInput.value) {
-                    if (deleteInput) {
-                        deleteInput.checked = true;
-                        deleteInput.value = 'on';
-                    } else {
-                        const hidden = document.createElement('input');
-                        hidden.type = 'hidden';
-                        hidden.name = item.getAttribute('data-prefix') + '-DELETE';
-                        hidden.value = 'on';
-                        item.appendChild(hidden);
-                    }
-                    item.style.display = 'none';
-                } else {
-                    item.remove();
-                    const items = container.querySelectorAll('.ingredient-item');
-                    items.forEach((it, idx) => {
-                        it.innerHTML = it.innerHTML
-                            .replace(prefixPattern, `-${idx}-`)
-                            .replace(/__prefix__/g, idx);
-                        it.setAttribute('data-prefix', it.getAttribute('data-prefix').replace(/\d+/, idx));
-                    });
-                    totalForms.value = items.length;
-                }
+        newNode.querySelectorAll('input').forEach(inp => {
+            if (inp.name && inp.name.endsWith('-id')) {
+                inp.value = "";
+            } else if (inp.name && inp.name.endsWith('-DELETE')) {
+                inp.checked = false;
+                inp.value = '';
+            } else {
+                inp.value = "";
             }
         });
+        newNode.querySelectorAll('textarea').forEach(t => t.value = "");
+
+        const html = newNode.innerHTML
+            .replace(prefixPattern, `-${currentCount}-`)
+            .replace(/__prefix__/g, currentCount);
+        newNode.innerHTML = html;
+
+        return newNode;
+    }
+
+    addBtn.addEventListener("click", () => {
+        const newNode = getEmptyForm();
+        if (newNode) {
+            container.appendChild(newNode);
+            totalForms.value = parseInt(totalForms.value, 10) + 1;
+        }
     });
+
+    container.addEventListener("click", (e) => {
+        if (e.target.classList.contains("btn-delete-ingredient")) {
+            const item = e.target.closest(".ingredient-item");
+            const idInput = item.querySelector('input[name$="-id"]');
+            const deleteInput = item.querySelector('input[name$="-DELETE"]');
+
+            const visibleItems = container.querySelectorAll('.ingredient-item:not([style*="display: none"])');
+
+            if (visibleItems.length <= 1) {
+                alert("Рецепт должен содержать хотя бы один ингредиент");
+                return;
+            }
+
+            if (idInput && idInput.value) {
+                if (deleteInput) {
+                   deleteInput.checked = true;
+                   deleteInput.value = 'on';
+                } else {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = item.getAttribute('data-prefix') + '-DELETE';
+                    hidden.value = 'on';
+                    item.appendChild(hidden);
+                }
+                item.style.display = 'none';
+            } else {
+                item.remove();
+                const items = container.querySelectorAll('.ingredient-item');
+                items.forEach((it, idx) => {
+                    it.innerHTML = it.innerHTML
+                        .replace(prefixPattern, `-${idx}-`)
+                        .replace(/__prefix__/g, idx);
+                    it.setAttribute('data-prefix', it.getAttribute('data-prefix').replace(/\d+/, idx));
+                });
+                totalForms.value = items.length;
+            }
+        }
+    });
+});
 </script>
+
 {% endblock %}

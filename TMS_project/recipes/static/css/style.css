@@ -77,9 +77,10 @@ textarea {
   min-width: 0;
 }
 
-form {
-    max-width: 600px;
-    margin: 0 auto;
+.comment-form-container form,
+.reply-form form {
+    max-width: none;
+    margin: 0;
 }
 
 .ingredient-item input {
@@ -89,3 +90,12 @@ form {
 .btn {
     border-radius: 10px;
 }
+
+.d-flex.align-items-center.gap-2.flex-nowrap {
+    flex-wrap: nowrap;
+}
+
+.reply-form .d-flex.gap-2 {
+    justify-content: flex-start;
+}
+

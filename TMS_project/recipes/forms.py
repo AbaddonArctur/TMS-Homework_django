@@ -19,15 +19,14 @@ class RecipeForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        for field in self.fields.values():
-            field.widget.attrs.update(
-                {"class": "form-control", "style": "max-width: 500px;"}
-            )
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({"class": "form-control"})
 
             if isinstance(field.widget, forms.Textarea):
-                field.widget.attrs.update(
-                    {"rows": 4, "style": "resize: vertical; max-width: 500px;"}
-                )
+                field.widget.attrs.update({
+                    "rows": 4,
+                    "style": "resize: none; overflow-y: hidden;"
+                })
 
 
 class IngredientForm(forms.ModelForm):
@@ -66,6 +65,7 @@ class CommentForm(forms.ModelForm):
                     "class": "form-control",
                     "rows": 3,
                     "placeholder": "Напишите комментарий...",
+                    "style": "resize: none; overflow-y: hidden;"
                 }
             )
         }
@@ -87,6 +87,4 @@ class RegisterForm(UserCreationForm):
         self.fields["password1"] = self.fields.pop("password")
         self.fields["password2"] = self.fields.pop("verify_password")
         for field in self.fields.values():
-            field.widget.attrs.update(
-                {"class": "form-control", "style": "max-width: 400px;"}
-            )
+            field.widget.attrs.update({"class": "form-control"})
